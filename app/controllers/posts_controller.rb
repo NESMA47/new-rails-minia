@@ -1,62 +1,52 @@
 class PostsController < ApplicationController
   # 1. GET /posts
-  # عرض كل البوستات بداخل قاعدة البيانات
+  # Display all posts from the database
   def index
     @posts = Post.all
+    render json: @posts
   end
 
   # 2. GET /posts/:id
-  # عرض بوست واحد محدد بناءً على الـ ID بتاعه
+  # Display a specific post by its ID
   def show
     @post = Post.find(params[:id])
+    render json: @post
   end
 
-  # 3. GET /posts/new
-  # عرض شاشة الفورم لإنشاء بوست جديد
-  def new
-    @post = Post.new
-  end
-
-  # 4. POST /posts
-  # استقبال بيانات الفورم وحفظها فعلياً في قاعدة البيانات
+  # 3. POST /posts
+  # Create a new post
   def create
     @post = Post.new(post_params)
     if @post.save
-      redirect_to @post, notice: 'Post was successfully created.'
+      render json: @post, status: :created
     else
-      render :new, status: :unprocessable_entity
+      render json: @post.errors, status: :unprocessable_entity
     end
   end
 
-  # 5. GET /posts/:id/edit
-  # عرض شاشة تعديل بوست موجود مسبقاً
-  def edit
-    @post = Post.find(params[:id])
-  end
-
-  # 6. PATCH/PUT /posts/:id
-  # استقبال البيانات المعدلة وتحديثها في قاعدة البيانات
+  # 4. PUT/PATCH /posts/:id
+  # Update an existing post
   def update
     @post = Post.find(params[:id])
     if @post.update(post_params)
-      redirect_to @post, notice: 'Post was successfully updated.'
+      render json: @post
     else
-      render :edit, status: :unprocessable_entity
+      render json: @post.errors, status: :unprocessable_entity
     end
   end
 
-  # 7. DELETE /posts/:id
-  # حذف البوست تماماً من قاعدة البيانات
+  # 5. DELETE /posts/:id
+  # Delete a specific post from the database
   def destroy
     @post = Post.find(params[:id])
     @post.destroy
-    redirect_to posts_path, notice: 'Post was successfully destroyed.'
+    head :no_content
   end
 
   private
 
-  # حماية الـ Parameters (Strong Parameters) لمنع الاختراق
+  # Strong parameters to permit safe attributes
   def post_params
-    params.require(:post).permit(:title, :content)
+    params.require(:post).permit(:title, :body, :user_id) # عدلي الحقول حسب الموديل عندكِ لو مختلفة
   end
 end
